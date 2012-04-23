@@ -15,7 +15,7 @@ class Quiz {
 
 $verbose = FALSE;
 $restrict = array();
-if (count($argv) > 1) {
+if (count($argv) > 2) {
 	foreach (array_slice($argv, 1) as $arg) {
 		if (substr($arg, 0, 1) == '-') {
 			switch ($arg) {
@@ -33,7 +33,7 @@ if (count($argv) > 1) {
 }
 
 $tests = array();
-$dir = dirname(__FILE__).'/';
+$dir = realpath(array_pop($argv)).'/';
 if (is_dir($dir)) {
 	if ($dh = opendir($dir)) {
 		while (($file = readdir($dh)) !== false) {
@@ -69,6 +69,10 @@ foreach ($tests as $test) {
 		$force_fail = TRUE;
 	}
 
+	if (method_exists($testClass, '_setup')) {
+		$testClass->_setup();
+	}
+
 	$methods = get_class_methods($test);
 
 	foreach ($methods as $method) {
@@ -77,7 +81,7 @@ foreach ($tests as $test) {
 			continue;
 		}
 
-		if (in_array($method, array('__construct'))) {
+		if (in_array($method, array('__construct', '_setup'))) {
 			continue;
 		}
 
